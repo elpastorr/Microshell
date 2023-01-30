@@ -33,7 +33,7 @@ int	main(int argc, char **argv, char **env)
 	(void)argc;
 	i = 0;
 	pid = 0;
-	tmp_fd = dup(STDIN_FILENO);
+	tmp_fd = dup(0);
 	while (argv[i] && argv[i + 1])
 	{
 		argv = &argv[i + 1];
@@ -56,15 +56,15 @@ int	main(int argc, char **argv, char **env)
 			pid = fork();
 			if (pid == 0)
 			{
-				dup2(tmp_fd, STDIN_FILENO);
+				dup2(tmp_fd, 0);
 				if (ft_execute(argv, i, tmp_fd, env))
 					return (1);
 			}
 			else
 			{
 				close(tmp_fd);
-				waitpid(-1, NULL, WUNTRACED);
-				tmp_fd = dup(STDIN_FILENO);
+				waitpid(-1, NULL, 2);
+				tmp_fd = dup(0);
 			}
 		}
 		else if (argv != &argv[i] && !strcmp(argv[i], "|"))
@@ -73,8 +73,8 @@ int	main(int argc, char **argv, char **env)
 			pid = fork();
 			if (pid == 0)
 			{
-				dup2(tmp_fd, STDIN_FILENO);
-				dup2(fd[1], STDOUT_FILENO);
+				dup2(tmp_fd, 0);
+				dup2(fd[1], 1);
 				close(fd[1]);
 				close(tmp_fd);
 				if (ft_execute(argv, i, tmp_fd, env))
@@ -84,7 +84,7 @@ int	main(int argc, char **argv, char **env)
 			{
 				close(tmp_fd);
 				close(fd[1]);
-				waitpid(-1, NULL, WUNTRACED);
+				waitpid(-1, NULL, 2);
 				tmp_fd = dup(fd[0]);
 				close(fd[0]);
 			}
